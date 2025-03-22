@@ -1,1 +1,0 @@
-simple random sampling versus stratified sampling: pop.data.Rdata
