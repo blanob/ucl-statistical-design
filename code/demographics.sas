@@ -75,9 +75,9 @@ PROC UNIVARIATE DATA=sashelp.demographics NOPRINT;
   INSET MEAN (5.2) STD="Std Dev" (5.2) Q1 (5.2) MEDIAN (5.2) Q3 (5.2);
 RUN;
 
-/*************************************************************************/
+/*****************************************************************************/
 /*	 SECTION 4.2: boxplots. Note the need to use demographics_sorted     */
-/*************************************************************************/
+/*****************************************************************************/
 TITLE "Education access in different world regions";
 PROC BOXPLOT DATA=demographics_sorted;
   PLOT (MaleSchoolPct FemaleSchoolPct)* Region;
@@ -137,9 +137,9 @@ QUIT;
 
 TITLE "STAT0023: Demographics data";
 
-/********************************************************************/
+/********************************************************************************/
 /*		SECTION 2.1: Confidence intervals for population means		*/
-/********************************************************************/
+/********************************************************************************/
 
 /*		Approximate 95% and 99% confidence intervals using CLM, or alternatively LCLM and UCLM.		*/
 PROC MEANS DATA=sashelp.demographics MEAN CLM ALPHA=.05 MAXDEC=3 FW=8;
@@ -156,18 +156,18 @@ PROC MEANS DATA=sashelp.demographics MEAN LCLM UCLM ALPHA=.01 MAXDEC=3 FW=8;
 	VAR FemaleSchoolPct MaleSchoolPct;
 RUN;
 
-/************************************************************************************/
+/************************************************************************************************/
 /*		SECTION 2.3: Chi-squared tests for association in contingency tables		*/
-/************************************************************************************/
+/************************************************************************************************/
 
 /*		Test for association between region and cont variables.		*/
 PROC FREQ DATA=sashelp.demographics;
 	TABLES cont*region / NOPERCENT NOROW NOCOL CHISQ;
 RUN;
 
-/********************************************************/
+/************************************************************************/
 /*		SECTION 2.3: Two-sample and paired t-tests		*/
-/********************************************************/
+/************************************************************************/
 
 PROC TTEST DATA=sashelp.demographics;
 	PAIRED MaleSchoolPct*FemaleSchoolPct;
@@ -184,7 +184,7 @@ PROC PRINT DATA=STAT0023.demographics_income (OBS=5) NOOBS;
 RUN;
 
 /*		The two-sample t-test suggests that we should reject the null hypothesis. Girls in High- and Low- income countries		*/
-/*      do not have the same level of access to primary education.                                                              */
+/*              do not have the same level of access to primary education.                                                                      */
 
 PROC TTEST DATA=STAT0023.demographics_income;
 	VAR FemaleSchoolPct;
@@ -224,7 +224,7 @@ PROC FREQ DATA=STAT0023.demographics_income;
 RUN;
 
 /*		Compute the lower end of a 99% confidence interval for the difference between the underlying means		*/ 
-/*		of FemaleSchoolpct for high- and low-income countries                                                   */
+/*		of FemaleSchoolpct for high- and low-income countries                                                           */
 PROC TTEST DATA=STAT0023.demographics_income ALPHA=.01;
 	VAR FemaleSchoolpct;
 	CLASS Income;
