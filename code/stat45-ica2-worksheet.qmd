@@ -1,0 +1,229 @@
+---
+title: "ICA2 Worksheet"
+subtitle: "UCL Statistical Design and Data Ethics (Spring 2025)"
+author: "[J. Tang](mailto:jinzhou.tang.22@ucl.ac.uk)"
+format:
+  pdf:
+    code-line-numbers: true
+---
+
+## Question 1
+
+(See $\S4.2$ and $\S4.3$ in the lecture notes)
+
+```{r}
+dta <- read.csv(file="22099232.txt")
+dta$x <- factor(dta$x, levels = c(5, 1, 2, 3, 4), ordered = FALSE)
+head(dta)
+```
+
+The data concern a one-way ANOVA experiment regarding the height of a flower plant. Response $Y$ is the response in centimeters, and `x` identifies the five treatment levels. Values `x` = 1, 2, 3, and 4 correspond with the use of four different fertilisers. The value `x` = 5 corresponds with the no-fertiliser treatment. The aim of the experiment is to establish how the height of the plant is affected by choice regarding fertilisers.
+
+### (a)
+
+Consider the hypothetical case where data for this experiment are collected by someone who uses her garden. Say she collected the data by using the front and the back garden as follows: plants with fertiliser `x` = 1 and `x` = 2 in the front garden, and the plants with the other treatment levels in the back garden. Explain briefly and in simple terms (without using the word “randomisation”) why this is not a good way to collect the data.
+
+Nuisance variables (e.g. intensity of sunlight and types of soil), if not controlled across treatment groups, introduce systematic errors (bias) to the experimental results. By planting treatment groups `x` = 1 and `x` = 2 in the front yard and the rest of treatment groups in the back yard, she failed to take precautions against sources of bias. It affects the accuracy of the results.
+
+![Nuisance variables]("nuisance-variables.jpg"){width=80%}
+
+### (b)
+
+Potassium is a common ingredient in fertilers. Consider the hypothetical case that fertiliser `x` = 1 has twice the amount of potassium compared to fertilisers identified by `x` = 2, 3, and 4. Would this undermine your statistical inference? Explain your answer.
+
+No. Since the aim of the experiment is to compare the effect of fertilisers on the height of the plant, difference in the concentration of potassium would be considered as part of the difference between treatment levels.
+
+### (c)
+
+Define a one-way linear ANOVA model for response $Y$ with an intercept. Define the model such that the intercept can be estimated by the mean of the observed values for $Y$ under the no-fertiliser treatment. Write down the model equation and specify this equation completely for your data.
+
+We have 100 observed values $y_{ij}$, subject to 5 treatment levels $x_i$, where $i$ = 1, $...$, 5 and $j$ = 1, $...$, $n_i$.
+
+We can define a one-way linear ANOVA model as
+$$
+Y_{ij} = \mu_5 + \alpha_i + \epsilon_{ij}
+$$ {#eq-linear-model}
+where $\mu_i = \frac{1}{n_i}\sum_j{y_{ij}}$, $\alpha_{i} = \mu_i - \mu_5$ and $\epsilon_{ij} \overset{\text{i.i.d.}}{\sim} N(0, \sigma^2)$ represents independent errors.
+
+### (d)
+
+Fit the model in **(c)** to your data and report the ANOVA table with clearly defined rows and columns. Using the model definition in **(c)**, define the hypothesis for testing whether all five treatment group means are equal. Test this hypothesis using the ANOVA table. Be explicit about the distribution you use for this test.
+
+Using the model definition in **(c)**, $\alpha_i$ is the difference beween the mean height of the $i$th fertiliser treatment group and the mean height of no-fertiliser treatment group. We are testing the null hypothesis $H_0:\alpha_1=\alpha_2=\ldots=\alpha_5=0$ against $H_1$ that at least one treatment group mean is different from the no-fertiliser group.
+
+```{r}
+tapply(dta$y, dta$x, mean)
+fit <- aov(y ~ x, data = dta)
+summary(fit)
+```
+
+Total sum of squares is 681.5. Total degrees of freedom is 99.
+
+At a significance level of 5%, we have strong evidence to reject the null hypothesis. We conclude that at least one pair of group means is unequal.
+
+### (e)
+
+Provide the point estimates for all the model parameters in **(c)**.
+
+```{r}
+dummy.coef(fit)
+```
+
+### (f)
+
+Define the estimator of the intercept in the model in **(c)** as a function of response mean(s) and derive the variance of this estimator as a function of the error variance $\sigma^2$ and the sample sizes for the treatment levels. Clearly explain your derivations.
+
+The intercept of the one-way linear ANOVA model in **(c)** is estimated by the sample mean of response $Y$ under the no-fertiliser treatment group $x$ = 5. The estimator is given by
+
+$$
+\begin{split}
+\hat{\mu}_5
+&=\bar{y}_{5\cdot}\\
+&=\frac{1}{n_5}\sum_{j=1}^{n_5} y_{5j}
+\end{split}
+$$ {#eq-estimator}
+
+The variance of the estimator is the variance of the sample mean. Sources of variation in $Y_{ij}$ can only be the independent error term $\epsilon_{ij} \sim N(0, \sigma^2)$. Hence the variance of the estimator is given by
+
+$$
+\begin{split}
+\text{Var}(\hat{\mu}_5)
+&=\text{Var}(\frac{1}{n_5}\sum_{j=1}^{n_5} y_{5j})\\
+&=\text{Var}(\frac{1}{n_5}\sum_{j=1}^{n_5} x_{5} + \epsilon_{5j})\\
+&=\frac{1}{{n_5}^2}\text{Var}(\sum_{j=1}^{n_5} \epsilon_{5j})\\
+&=\frac{1}{{n_5}^2}\sum_{j=1}^{n_5}\sigma_j^2\\
+&=\frac{1}{n_5}\sigma^2
+\end{split}
+$$ {#eq-variance}
+
+## Question 2
+
+(See $\S2.6$ in the lecture notes)
+
+### (a)
+
+Derive
+
+$$
+a = \frac{\sum_{\ell=1}^s \sqrt{c_\ell} W_\ell \sigma_\ell}{V +
+\sum_{\ell=1}^s W^2_\ell \sigma^2_\ell/ N_\ell}.
+$$ {#eq-proportionality}
+
+From $\S2.6.3.3$, we obtain an expression of $a$ such that for a fiexed total cost $C=C_{tot}=c_0 + \sum_{\ell=1}^s c_\ell n_\ell$
+, stratum sample size $n_\ell  = aW_\ell\sigma_\ell/\sqrt{ c_\ell}$ will give the smallest achieveable variance $V$.
+
+$$
+a \; = \; \frac{C_{tot}- c_0} {\sum_{\ell=1}^s \sqrt c_\ell  W_\ell \sigma_\ell}\
+$$ {#eq-start}
+
+Substitute the given total cost into @eq-start, we have
+
+$$
+\begin{split}
+a \; = \; \frac{\sum_{\ell=1}^s c_\ell n_\ell} {\sum_{\ell=1}^s \sqrt c_\ell  W_\ell \sigma_\ell}\\
+= \; \frac{\sum_{\ell=1}^s \sqrt c_\ell W_\ell \sigma_\ell} {\sum_{\ell=1}^s  W_\ell^2 \sigma_\ell^2/n_\ell}
+\end{split}
+$$ {#eq-step1}
+
+We know $V = \sum_{\ell=1}^s W^2_\ell \sigma^2_\ell/n_\ell  -  \sum_{\ell=1}^s W^2_\ell \sigma^2_\ell/N_\ell$. Hence we obtain
+
+$$
+\begin{split}
+a \; = \; \frac{\sum_{\ell=1}^s \sqrt c_\ell W_\ell \sigma_\ell} {V + \sum_{\ell=1}^s  W_\ell^2 \sigma_\ell^2/N_\ell}
+\end{split}
+$$ {#eq-step2}
+
+### (b)
+
+Consider stratified sampling with the following specifications:
+
+$$
+\begin{aligned}
+&\begin{array}{|l|rrrrr|} \hline
+\text{Stratum } & 1 & 2& 3& 4 & 5 \\
+\text{Stratum size} & 2000& 5000& 3000& 3000 & 2000
+\\
+\text{Strata variance} &
+4 &  4& 16& 16& 64\\ \hline         
+\end{array}
+\end{aligned}
+$$
+
+Consider that the variance of the stratified sample mean $\bar{Y}_{ST}$ is fixed at $1/10$. Assume that costs are defined by $c_0+\sum_{\ell=1}^5c_\ell n_\ell$, where $c_0=100$, and $(c_1,c_2,c_3,c_4,c_5)=(1,2,1,2,4)$. Derive the optimal strata sample sizes $n_\ell$, for $\ell=1,2,3,4,5$. Explain your derivation.
+
+```{r}
+V <- 1/10
+
+strataSize <- c(2000, 5000, 3000, 3000, 2000)
+popSize <- sum(strataSize)
+W_l <- strataSize/popSize
+
+strataVariance <- c(4,4,16,16,64)
+strataSD <- sqrt(strataVariance)
+
+strataCost <- c(1,2,1,2,4)
+sqrtCost <- sqrt(strataCost)
+
+a <- sum(sqrtCost * W_l * strataSD)/(V+sum(W_l^2 * strataVariance/strataSize))
+
+sampleSize <- a*W_l*strataSD/sqrtCost
+print(sampleSize)
+```
+
+## Question 3
+
+(See $\S3.3$ in the lecture slides)
+
+Consider the following randomised response (RR) design for a `yes`-or-`no` question that asks respondents whether or not they have committed fraud. Instead of answering the question directly, the respondent throws a dice and keeps the outcome of the throw hidden from the interviewer.
+
+- If the outcome of the throw is 1 or 2, then the respondent answers `yes`.
+
+- If the outcome of the throw is 6, then the respondent answers `no`.
+
+- If the outcome of the throw is 3, 4, or 5, then respondent answers `yes` or `no` in line with whether or not he or she committed fraud.
+
+Assume that respondents follow the RR design. Let $\pi_1$ denote the probability that a respondent has committed fraud.
+
+### (a)
+
+For this RR design, give the values of the conditional probabilities $P(\text{observed}\  yes|\text{latent}\  yes)$ and $P(\text{observed}\  no|\text{latent}\  no)$, where observed refers to the data collected, and latent refers to the unknown status regarding fraud.
+
+### (b)
+
+The observed data are given by 300 `yes`-answers, and 500 `no`-answers. Estimate $\pi_1$ and calculate the standard error for this estimate. Explain your answers.
+
+```{r}
+obs <- c(300,500)
+n   <- sum(obs)
+p   <- 5/6
+q   <- 2/3
+P   <- matrix(c(p, 1-p, 1-q, q),2,2)
+# Moment estimate:
+lambda    <- obs/n
+estim     <- solve(P)%*%lambda
+var.estim <- 1/n*solve(P)%*%( diag(as.vector(lambda))- lambda%*%t(lambda) )%*%t(solve(P))
+sqrt(diag(var.estim))
+```
+
+### (c)
+
+Consider the RR design by Warner as specified on Slide 109. Define $Y_i=1$ when respondent $i$ used illegal drugs, and $Y_i=0$ otherwise. Say there are two non-overlapping groups of respondents in the RR survey: Group A and Group B. Consider the logistic regression model
+
+$$
+p_i=P(Y_i=1|x_i)
+=\frac{\exp(\beta_0+\beta_1x_i)}{1+\exp(\beta_0+\beta_1x_i)}\ ,
+$$
+
+where $x_i=0$ when respondent $i$ belongs to Group A, and $x_i=1$ when $i$ belongs to Group B. Using the RR design, assume that the probability of observing a `yes`-response in Group A is estimated by $\widehat{\lambda}_A$.
+
+
+## Question 4
+
+(See $\S2.8$ in the lecture notes)
+
+```{r}
+clusterMean <- c(14.5, 16.7, 13.6)
+popMean <- mean(clusterMean)
+stdError <- sum((clusterMean-popMean)^2)/(length(clusterMean)*(length(clusterMean)-1))
+print(stdError)
+```
